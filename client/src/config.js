@@ -1,11 +1,13 @@
 // Ortam deðiþkenine göre veya otomatik olarak backend URL'ini belirle
 const getBackendUrl = () => {
-    // Eðer localhost'ta deðilsek, ayný host'u kullan
-    if (window.location.hostname !== 'localhost') {
-        return `http://${window.location.hostname}:3001`;
+    // BURAYA RAILWAY'DEN ALDIÐIN URL'YÝ YAZ
+    const PRODUCTION_URL = 'https://qr-message-wall-production.up.railway.app';
+
+    if (window.location.hostname === 'localhost') {
+        return 'http://localhost:3001';
     }
-    // Localhost'ta ise
-    return 'http://localhost:3001';
+
+    return PRODUCTION_URL;
 };
 
 export const BACKEND_URL = getBackendUrl();
