@@ -1,3 +1,6 @@
+/* Font from design - HeronSans-Bold */
+@import url('https://fonts.cdnfonts.com/css/heron-sans');
+
 /* ===== LIGHT THEME (DEFAULT) ===== */
 .admin-panel {
     min-height: 100vh;
@@ -58,6 +61,8 @@
 .admin-header h1 {
     margin: 0;
     font-size: 1.8rem;
+    font-family: 'HeronSans', 'Segoe UI', Tahoma, sans-serif;
+    font-weight: 700;
     color: var(--text-primary);
 }
 
@@ -153,6 +158,8 @@
     margin: 0;
     color: var(--text-primary);
     font-size: 1.5rem;
+    font-family: 'HeronSans', 'Segoe UI', Tahoma, sans-serif;
+    font-weight: 700;
 }
 
 .table-controls {
@@ -310,6 +317,8 @@
 .logs-section h2,
 .stats-section h2 {
     margin: 0 0 15px 0;
+    font-family: 'HeronSans', 'Segoe UI', Tahoma, sans-serif;
+    font-weight: 700;
     color: var(--text-primary);
     font-size: 1.2rem;
 }
@@ -744,4 +753,187 @@
 .logs-section,
 .stats-section {
     animation: fadeIn 0.5s ease;
+}
+
+/* ===== TAB NAVIGATION ===== */
+.tabs-navigation {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 10px;
+}
+
+.tab-btn {
+    padding: 10px 20px;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s;
+    position: relative;
+}
+
+.tab-btn:hover {
+    color: var(--text-primary);
+    background: var(--bg-secondary);
+    border-radius: 8px 8px 0 0;
+}
+
+.tab-btn.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+}
+
+.tab-badge {
+    display: inline-block;
+    background: var(--danger);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: bold;
+    padding: 2px 8px;
+    border-radius: 12px;
+    margin-left: 8px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1.1);
+    }
+}
+
+/* ===== STATUS BADGE ===== */
+.status-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.status-badge.status-pending {
+    background: #ffeaa7;
+    color: #d63031;
+}
+
+.status-badge.status-approved {
+    background: #55efc4;
+    color: #00b894;
+}
+
+/* ===== ACTION BUTTONS ===== */
+.action-buttons {
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+}
+
+.btn-approve {
+    background: transparent;
+    color: var(--success);
+    padding: 5px 10px;
+    font-size: 1.2rem;
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.btn-approve:hover {
+    background: var(--success);
+    color: white;
+    transform: scale(1.1);
+}
+
+.btn-reject {
+    background: transparent;
+    color: var(--danger);
+    padding: 5px 10px;
+    font-size: 1.2rem;
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.btn-reject:hover {
+    background: var(--danger);
+    color: white;
+    transform: scale(1.1);
+}
+
+.btn-success {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--success);
+    color: white;
+}
+
+.btn-success:hover {
+    opacity: 0.8;
+    transform: scale(1.02);
+}
+
+.btn-success:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ===== MOBILE ACTION BUTTONS ===== */
+.mobile-action-buttons {
+    display: flex;
+    gap: 5px;
+}
+
+.mobile-approve-btn {
+    background: var(--success);
+    color: white;
+    padding: 6px 12px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.mobile-approve-btn:hover {
+    opacity: 0.8;
+    transform: scale(1.05);
+}
+
+.mobile-reject-btn {
+    background: var(--danger);
+    color: white;
+    padding: 6px 12px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.mobile-reject-btn:hover {
+    opacity: 0.8;
+    transform: scale(1.05);
+}
+
+/* Mobile card status badge positioning */
+.mobile-card-header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }

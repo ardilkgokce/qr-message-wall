@@ -155,6 +155,145 @@ app.get('/api/admin/logs', (req, res) => {
     res.json(systemLogs.slice(0, limit));
 });
 
+// ===== MESAJ ONAY/RED SİSTEMİ =====
+
+// Tek mesajı onayla
+app.post('/api/admin/message/:section/:id/approve', (req, res) => {
+    const { section, id } = req.params;
+
+    if (!messages[section]) {
+        return res.status(404).json({ error: 'Bölüm bulunamadı' });
+    }
+
+    const message = messages[section].find(msg => msg.id == id);
+
+    if (!message) {
+        return res.status(404).json({ error: 'Mesaj bulunamadı' });
+    }
+
+    // Mesajı onayla
+    message.status = 'approved';
+
+    // Log ekle
+    addLog('approve', 'Mesaj onaylandı', { section, id, author: message.author });
+
+    // Tüm clientlara onaylanmış mesajı bildir (ekranda gösterilecek)
+    io.emit('message-approved', { section, message });
+
+    res.json({ success: true, message: 'Mesaj onaylandı' });
+});
+
+// Tek mesajı reddet
+app.post('/api/admin/message/:section/:id/reject', (req, res) => {
+    const { section, id } = req.params;
+
+    if (!messages[section]) {
+        return res.status(404).json({ error: 'Bölüm bulunamadı' });
+    }
+
+    const messageIndex = messages[section].findIndex(msg => msg.id == id);
+
+    if (messageIndex === -1) {
+        return res.status(404).json({ error: 'Mesaj bulunamadı' });
+    }
+
+    const rejectedMessage = messages[section].splice(messageIndex, 1)[0];
+
+    // Log ekle
+    addLog('reject', 'Mesaj reddedildi', { section, id, author: rejectedMessage.author });
+
+    // Admin panele bildir (mesaj tamamen silindi)
+    io.emit('message-rejected', { section, id });
+
+    res.json({ success: true, message: 'Mesaj reddedildi' });
+});
+
+// Toplu mesaj onayla
+app.post('/api/admin/messages/approve-bulk', (req, res) => {
+    const { messageIds } = req.body; // [{ section, id }, ...]
+
+    if (!Array.isArray(messageIds) || messageIds.length === 0) {
+        return res.status(400).json({ error: 'Geçersiz mesaj listesi' });
+    }
+
+    let approvedCount = 0;
+    const approvedMessages = [];
+
+    messageIds.forEach(({ section, id }) => {
+        if (messages[section]) {
+            const message = messages[section].find(msg => msg.id == id);
+            if (message) {
+                message.status = 'approved';
+                approvedMessages.push({ section, message });
+                approvedCount++;
+            }
+        }
+    });
+
+    // Log ekle
+    addLog('approve-bulk', `${approvedCount} mesaj toplu onaylandı`, { count: approvedCount });
+
+    // Her onaylanan mesajı ayrı ayrı bildir
+    approvedMessages.forEach(({ section, message }) => {
+        io.emit('message-approved', { section, message });
+    });
+
+    res.json({ success: true, message: `${approvedCount} mesaj onaylandı`, count: approvedCount });
+});
+
+// Toplu mesaj reddet
+app.post('/api/admin/messages/reject-bulk', (req, res) => {
+    const { messageIds } = req.body; // [{ section, id }, ...]
+
+    if (!Array.isArray(messageIds) || messageIds.length === 0) {
+        return res.status(400).json({ error: 'Geçersiz mesaj listesi' });
+    }
+
+    let rejectedCount = 0;
+    const rejectedIds = [];
+
+    messageIds.forEach(({ section, id }) => {
+        if (messages[section]) {
+            const messageIndex = messages[section].findIndex(msg => msg.id == id);
+            if (messageIndex !== -1) {
+                messages[section].splice(messageIndex, 1);
+                rejectedIds.push({ section, id });
+                rejectedCount++;
+            }
+        }
+    });
+
+    // Log ekle
+    addLog('reject-bulk', `${rejectedCount} mesaj toplu reddedildi`, { count: rejectedCount });
+
+    // Her reddedilen mesajı ayrı ayrı bildir
+    rejectedIds.forEach(({ section, id }) => {
+        io.emit('message-rejected', { section, id });
+    });
+
+    res.json({ success: true, message: `${rejectedCount} mesaj reddedildi`, count: rejectedCount });
+});
+
+// Pending mesaj sayısını getir
+app.get('/api/admin/messages/pending', (req, res) => {
+    let pendingCount = 0;
+    const pendingMessages = [];
+
+    Object.keys(messages).forEach(section => {
+        messages[section].forEach(msg => {
+            if (msg.status === 'pending') {
+                pendingCount++;
+                pendingMessages.push({
+                    ...msg,
+                    section
+                });
+            }
+        });
+    });
+
+    res.json({ count: pendingCount, messages: pendingMessages });
+});
+
 // Socket bağlantıları
 io.on('connection', (socket) => {
     activeConnections++;
@@ -180,7 +319,8 @@ io.on('connection', (socket) => {
             id: Date.now(),
             text: text.substring(0, 280), // Max 280 karakter
             author: author || 'Anonim',
-            timestamp: new Date()
+            timestamp: new Date(),
+            status: 'pending' // Yeni mesajlar onay bekliyor
         };
 
         // Mesajı ilgili bölüme ekle
@@ -191,8 +331,8 @@ io.on('connection', (socket) => {
             messages[section] = messages[section].slice(-50);
         }
 
-        // Tüm kullanıcılara yayınla
-        io.emit('message-added', { section, message: newMessage });
+        // Admin panele pending mesaj olarak bildir (ekranda gösterilmez)
+        io.emit('pending-message-added', { section, message: newMessage });
 
         // Log ekle
         addLog('new-message', 'Yeni mesaj eklendi', {

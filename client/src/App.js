@@ -4,6 +4,7 @@ import DisplayScreen from './components/DisplayScreen';
 import MobileForm from './components/MobileForm';
 import QRCodeDisplay from './components/QRCodeDisplay';
 import AdminPanel from './components/AdminPanel';
+import KioskScreen from './components/KioskScreen';
 import './App.css';
 
 function App() {
@@ -19,6 +20,10 @@ function App() {
 
                     {/* Mobil Form - QR okutunca açılacak */}
                     <Route path="/send/:section" element={<MobileForm />} />
+
+                    {/* Kiosk Ekranı - Dokunmatik ekran için */}
+                    <Route path="/kiosk" element={<KioskScreen />} />
+                    <Route path="/kiosk/:section" element={<KioskScreen />} />
 
                     {/* Admin Kontrol Paneli - ?key=admin123 ile erişim */}
                     <Route path="/admin" element={<AdminPanel />} />

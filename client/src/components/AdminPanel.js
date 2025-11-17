@@ -19,13 +19,15 @@ function AdminPanel() {
     const [darkMode, setDarkMode] = useState(() => {
         return localStorage.getItem('adminDarkMode') === 'true';
     });
+    const [activeTab, setActiveTab] = useState('pending'); // 'all', 'pending', 'approved'
+    const [pendingCount, setPendingCount] = useState(0);
 
     const sectionTitles = {
-        section1: '🎉 Kutlamalar',
-        section2: '💭 Dilekler',
-        section3: '💡 Fikirler',
-        section4: '❤️ Teşekkürler',
-        section5: '📢 Duyurular'
+        section1: '🤝 ORTAK GELECEK',
+        section2: '👥 İŞ BİRLİĞİ & HİKAYE',
+        section3: '➡️ MERAK & CESARET',
+        section4: '⚡ TEKNOLOJİ',
+        section5: '❤️ MÜŞTERİ DENEYİMİ'
     };
 
     // URL key kontrolü
@@ -44,24 +46,40 @@ function AdminPanel() {
         setSocket(newSocket);
 
         // Real-time event'leri dinle
-        newSocket.on('message-added', () => {
+        newSocket.on('pending-message-added', () => {
             fetchMessages();
             fetchStatus();
+            fetchPendingCount();
+        });
+
+        newSocket.on('message-approved', () => {
+            fetchMessages();
+            fetchStatus();
+            fetchPendingCount();
+        });
+
+        newSocket.on('message-rejected', () => {
+            fetchMessages();
+            fetchStatus();
+            fetchPendingCount();
         });
 
         newSocket.on('message-deleted', () => {
             fetchMessages();
             fetchStatus();
+            fetchPendingCount();
         });
 
         newSocket.on('section-cleared', () => {
             fetchMessages();
             fetchStatus();
+            fetchPendingCount();
         });
 
         newSocket.on('all-messages-cleared', () => {
             fetchMessages();
             fetchStatus();
+            fetchPendingCount();
         });
 
         return () => newSocket.close();
@@ -72,11 +90,13 @@ function AdminPanel() {
         fetchMessages();
         fetchStatus();
         fetchLogs();
+        fetchPendingCount();
 
         // Her 5 saniyede bir status ve log güncelle
         const interval = setInterval(() => {
             fetchStatus();
             fetchLogs();
+            fetchPendingCount();
         }, 5000);
 
         return () => clearInterval(interval);
@@ -119,6 +139,108 @@ function AdminPanel() {
             setLogs(data);
         } catch (error) {
             console.error('Loglar yüklenemedi:', error);
+        }
+    };
+
+    const fetchPendingCount = async () => {
+        try {
+            const response = await fetch(`${BACKEND_URL}/api/admin/messages/pending`);
+            const data = await response.json();
+            setPendingCount(data.count);
+        } catch (error) {
+            console.error('Pending sayısı yüklenemedi:', error);
+        }
+    };
+
+    const approveMessage = async (section, id) => {
+        try {
+            await fetch(`${BACKEND_URL}/api/admin/message/${section}/${id}/approve`, {
+                method: 'POST'
+            });
+            fetchMessages();
+            fetchStatus();
+            fetchLogs();
+            fetchPendingCount();
+        } catch (error) {
+            console.error('Mesaj onaylanamadı:', error);
+        }
+    };
+
+    const rejectMessage = async (section, id) => {
+        if (!window.confirm('Bu mesajı reddetmek istediğinizden emin misiniz? Mesaj kalıcı olarak silinecek.')) {
+            return;
+        }
+
+        try {
+            await fetch(`${BACKEND_URL}/api/admin/message/${section}/${id}/reject`, {
+                method: 'POST'
+            });
+            fetchMessages();
+            fetchStatus();
+            fetchLogs();
+            fetchPendingCount();
+        } catch (error) {
+            console.error('Mesaj reddedilemedi:', error);
+        }
+    };
+
+    const approveSelected = async () => {
+        if (selectedMessages.length === 0) {
+            alert('Lütfen onaylamak için mesaj seçin');
+            return;
+        }
+
+        try {
+            const messageIds = selectedMessages.map(msgId => {
+                const message = messages.find(m => m.id === msgId);
+                return { section: message.section, id: message.id };
+            });
+
+            await fetch(`${BACKEND_URL}/api/admin/messages/approve-bulk`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ messageIds })
+            });
+
+            setSelectedMessages([]);
+            fetchMessages();
+            fetchStatus();
+            fetchLogs();
+            fetchPendingCount();
+        } catch (error) {
+            console.error('Mesajlar onaylanamadı:', error);
+        }
+    };
+
+    const rejectSelected = async () => {
+        if (selectedMessages.length === 0) {
+            alert('Lütfen reddetmek için mesaj seçin');
+            return;
+        }
+
+        if (!window.confirm(`${selectedMessages.length} mesajı reddetmek istediğinizden emin misiniz? Mesajlar kalıcı olarak silinecek.`)) {
+            return;
+        }
+
+        try {
+            const messageIds = selectedMessages.map(msgId => {
+                const message = messages.find(m => m.id === msgId);
+                return { section: message.section, id: message.id };
+            });
+
+            await fetch(`${BACKEND_URL}/api/admin/messages/reject-bulk`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ messageIds })
+            });
+
+            setSelectedMessages([]);
+            fetchMessages();
+            fetchStatus();
+            fetchLogs();
+            fetchPendingCount();
+        } catch (error) {
+            console.error('Mesajlar reddedilemedi:', error);
         }
     };
 
@@ -225,12 +347,22 @@ function AdminPanel() {
     };
 
     const toggleAllSelection = () => {
-        if (selectedMessages.length === messages.length) {
+        if (selectedMessages.length === filteredMessages.length) {
             setSelectedMessages([]);
         } else {
-            setSelectedMessages(messages.map(m => m.id));
+            setSelectedMessages(filteredMessages.map(m => m.id));
         }
     };
+
+    // Mesajları tab'e göre filtrele ve en yeni önce sırala
+    const filteredMessages = messages
+        .filter(msg => {
+            if (activeTab === 'all') return true;
+            if (activeTab === 'pending') return msg.status === 'pending';
+            if (activeTab === 'approved') return msg.status === 'approved';
+            return true;
+        })
+        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); // En yeni önce
 
     return (
         <div className={`admin-panel ${darkMode ? 'dark' : 'light'}`}>
@@ -256,22 +388,70 @@ function AdminPanel() {
 
             <div className="admin-content">
                 <section className="messages-section">
+                    {/* Tab Navigation */}
+                    <div className="tabs-navigation">
+                        <button
+                            className={`tab-btn ${activeTab === 'pending' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('pending')}
+                        >
+                            ⏳ Onay Bekleyenler
+                            {pendingCount > 0 && <span className="tab-badge">{pendingCount}</span>}
+                        </button>
+                        <button
+                            className={`tab-btn ${activeTab === 'approved' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('approved')}
+                        >
+                            ✅ Onaylananlar
+                        </button>
+                        <button
+                            className={`tab-btn ${activeTab === 'all' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('all')}
+                        >
+                            📋 Tüm Mesajlar
+                        </button>
+                    </div>
+
                     <div className="section-header">
-                        <h2>Mesajlar ({messages.length})</h2>
+                        <h2>
+                            {activeTab === 'pending' && `⏳ Onay Bekleyen Mesajlar (${filteredMessages.length})`}
+                            {activeTab === 'approved' && `✅ Onaylanan Mesajlar (${filteredMessages.length})`}
+                            {activeTab === 'all' && `📋 Tüm Mesajlar (${filteredMessages.length})`}
+                        </h2>
                         <div className="table-controls">
-                            <button onClick={exportCSV} className="btn-primary">
-                                📥 CSV İndir
-                            </button>
-                            <button
-                                onClick={deleteSelected}
-                                className="btn-warning"
-                                disabled={selectedMessages.length === 0}
-                            >
-                                🗑️ Seçilenleri Sil ({selectedMessages.length})
-                            </button>
-                            <button onClick={deleteAll} className="btn-danger">
-                                ⚠️ Tümünü Sil
-                            </button>
+                            {activeTab === 'pending' ? (
+                                <>
+                                    <button
+                                        onClick={approveSelected}
+                                        className="btn-success"
+                                        disabled={selectedMessages.length === 0}
+                                    >
+                                        ✅ Seçilenleri Onayla ({selectedMessages.length})
+                                    </button>
+                                    <button
+                                        onClick={rejectSelected}
+                                        className="btn-danger"
+                                        disabled={selectedMessages.length === 0}
+                                    >
+                                        ❌ Seçilenleri Reddet ({selectedMessages.length})
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <button onClick={exportCSV} className="btn-primary">
+                                        📥 CSV İndir
+                                    </button>
+                                    <button
+                                        onClick={deleteSelected}
+                                        className="btn-warning"
+                                        disabled={selectedMessages.length === 0}
+                                    >
+                                        🗑️ Seçilenleri Sil ({selectedMessages.length})
+                                    </button>
+                                    <button onClick={deleteAll} className="btn-danger">
+                                        ⚠️ Tümünü Sil
+                                    </button>
+                                </>
+                            )}
                         </div>
                     </div>
 
@@ -283,24 +463,29 @@ function AdminPanel() {
                                     <th>
                                         <input
                                             type="checkbox"
-                                            checked={selectedMessages.length === messages.length && messages.length > 0}
+                                            checked={selectedMessages.length === filteredMessages.length && filteredMessages.length > 0}
                                             onChange={toggleAllSelection}
                                         />
                                     </th>
                                     <th>Bölüm</th>
                                     <th>Gönderen</th>
                                     <th>Mesaj</th>
+                                    <th>Durum</th>
                                     <th>Tarih/Saat</th>
                                     <th>İşlem</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {messages.length === 0 ? (
+                                {filteredMessages.length === 0 ? (
                                     <tr>
-                                        <td colSpan="6" className="no-data">Henüz mesaj yok</td>
+                                        <td colSpan="7" className="no-data">
+                                            {activeTab === 'pending' && 'Onay bekleyen mesaj yok'}
+                                            {activeTab === 'approved' && 'Henüz onaylanmış mesaj yok'}
+                                            {activeTab === 'all' && 'Henüz mesaj yok'}
+                                        </td>
                                     </tr>
                                 ) : (
-                                    messages.map(msg => (
+                                    filteredMessages.map(msg => (
                                         <tr key={`${msg.section}-${msg.id}`}>
                                             <td>
                                                 <input
@@ -316,16 +501,43 @@ function AdminPanel() {
                                             </td>
                                             <td>{msg.author}</td>
                                             <td className="message-text-cell">{msg.text}</td>
+                                            <td>
+                                                <span className={`status-badge status-${msg.status}`}>
+                                                    {msg.status === 'pending' ? '⏳ Bekliyor' : '✅ Onaylı'}
+                                                </span>
+                                            </td>
                                             <td className="date-cell">
                                                 {new Date(msg.timestamp).toLocaleString('tr-TR')}
                                             </td>
                                             <td>
-                                                <button
-                                                    onClick={() => deleteMessage(msg.section, msg.id)}
-                                                    className="btn-delete"
-                                                >
-                                                    🗑️
-                                                </button>
+                                                <div className="action-buttons">
+                                                    {msg.status === 'pending' ? (
+                                                        <>
+                                                            <button
+                                                                onClick={() => approveMessage(msg.section, msg.id)}
+                                                                className="btn-approve"
+                                                                title="Onayla"
+                                                            >
+                                                                ✅
+                                                            </button>
+                                                            <button
+                                                                onClick={() => rejectMessage(msg.section, msg.id)}
+                                                                className="btn-reject"
+                                                                title="Reddet"
+                                                            >
+                                                                ❌
+                                                            </button>
+                                                        </>
+                                                    ) : (
+                                                        <button
+                                                            onClick={() => deleteMessage(msg.section, msg.id)}
+                                                            className="btn-delete"
+                                                            title="Sil"
+                                                        >
+                                                            🗑️
+                                                        </button>
+                                                    )}
+                                                </div>
                                             </td>
                                         </tr>
                                     ))
@@ -336,24 +548,26 @@ function AdminPanel() {
 
                     {/* Mobile Card View */}
                     <div className="mobile-messages-list">
-                        {messages.length === 0 ? (
+                        {filteredMessages.length === 0 ? (
                             <div className="mobile-no-messages">
-                                Henüz mesaj yok
+                                {activeTab === 'pending' && 'Onay bekleyen mesaj yok'}
+                                {activeTab === 'approved' && 'Henüz onaylanmış mesaj yok'}
+                                {activeTab === 'all' && 'Henüz mesaj yok'}
                             </div>
                         ) : (
                             <>
                                 <div className="mobile-select-all">
                                     <input
                                         type="checkbox"
-                                        checked={selectedMessages.length === messages.length}
+                                        checked={selectedMessages.length === filteredMessages.length}
                                         onChange={toggleAllSelection}
                                         id="mobile-select-all"
                                     />
                                     <label htmlFor="mobile-select-all">
-                                        Tümünü Seç ({messages.length})
+                                        Tümünü Seç ({filteredMessages.length})
                                     </label>
                                 </div>
-                                {messages.map(msg => (
+                                {filteredMessages.map(msg => (
                                     <div
                                         key={`mobile-${msg.section}-${msg.id}`}
                                         className={`mobile-message-card ${selectedMessages.includes(msg.id) ? 'selected' : ''}`}
@@ -369,13 +583,38 @@ function AdminPanel() {
                                                 <span className="mobile-section-badge">
                                                     {sectionTitles[msg.section]}
                                                 </span>
+                                                <span className={`status-badge status-${msg.status}`}>
+                                                    {msg.status === 'pending' ? '⏳' : '✅'}
+                                                </span>
                                             </div>
-                                            <button
-                                                onClick={() => deleteMessage(msg.section, msg.id)}
-                                                className="mobile-delete-btn"
-                                            >
-                                                🗑️
-                                            </button>
+                                            <div className="mobile-action-buttons">
+                                                {msg.status === 'pending' ? (
+                                                    <>
+                                                        <button
+                                                            onClick={() => approveMessage(msg.section, msg.id)}
+                                                            className="mobile-approve-btn"
+                                                            title="Onayla"
+                                                        >
+                                                            ✅
+                                                        </button>
+                                                        <button
+                                                            onClick={() => rejectMessage(msg.section, msg.id)}
+                                                            className="mobile-reject-btn"
+                                                            title="Reddet"
+                                                        >
+                                                            ❌
+                                                        </button>
+                                                    </>
+                                                ) : (
+                                                    <button
+                                                        onClick={() => deleteMessage(msg.section, msg.id)}
+                                                        className="mobile-delete-btn"
+                                                        title="Sil"
+                                                    >
+                                                        🗑️
+                                                    </button>
+                                                )}
+                                            </div>
                                         </div>
                                         <div className="mobile-card-author">
                                             👤 {msg.author}

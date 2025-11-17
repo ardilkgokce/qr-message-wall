@@ -37,10 +37,16 @@ function DisplayScreen() {
         });
 
         newSocket.on('initial-messages', (initialMessages) => {
-            setMessages(initialMessages);
+            // Sadece onaylanmış mesajları göster
+            const approvedMessages = {};
+            Object.keys(initialMessages).forEach(section => {
+                approvedMessages[section] = initialMessages[section].filter(msg => msg.status === 'approved');
+            });
+            setMessages(approvedMessages);
         });
 
-        newSocket.on('message-added', ({ section, message }) => {
+        // Onaylanan mesajlar ekranda görünür
+        newSocket.on('message-approved', ({ section, message }) => {
             setMessages(prevMessages => ({
                 ...prevMessages,
                 [section]: [...prevMessages[section], message]
@@ -143,38 +149,42 @@ function DisplayScreen() {
     }, [messages]);
 
     const sectionTitles = {
-        section1: '🎉 Kutlamalar',
-        section2: '💭 Dilekler',
-        section3: '💡 Fikirler',
-        section4: '❤️ Teşekkürler',
-        section5: '📢 Duyurular'
+        section1: 'ORTAK GELECEK',
+        section2: 'İŞ BİRLİĞİ & HİKAYE',
+        section3: 'MERAK & CESARET',
+        section4: 'TEKNOLOJİ',
+        section5: 'MÜŞTERİ DENEYİMİ'
     };
 
-    const sectionColors = {
-        section1: '#FF6B6B',
-        section2: '#4ECDC4',
-        section3: '#45B7D1',
-        section4: '#96CEB4',
-        section5: '#FECA57'
+    const sectionLogos = {
+        section1: '/assets/ortak-gelecek.png',
+        section2: '/assets/is-birligi-hikaye.png',
+        section3: '/assets/merak-cesaret.png',
+        section4: '/assets/teknoloji.png',
+        section5: '/assets/musteri-deneyimi.png'
     };
 
     return (
         <div className="display-screen">
             {/* Header */}
             <header className="display-header">
-                <h1>🎊 Etkinlik Mesaj Duvarı 🎊</h1>
-                <p>Mesajınızı göndermek için QR kodu okutun!</p>
+                <h1>BENİM PRENSİBİM DUVARI</h1>
             </header>
 
             {/* Mesaj Bölümleri */}
             <div className="sections-container">
                 {Object.entries(messages).map(([sectionKey, sectionMessages]) => (
-                    <div key={sectionKey} className="section-wrapper" data-section={sectionKey}>
-                        <div
-                            className="message-section"
-                            style={{ backgroundColor: sectionColors[sectionKey] + '20', borderTop: `3px solid ${sectionColors[sectionKey]}` }}
-                        >
-                            <h2 style={{ color: sectionColors[sectionKey] }}>{sectionTitles[sectionKey]}</h2>
+                    <div key={sectionKey} className="section-column" data-section={sectionKey}>
+                        <div className="section-wrapper">
+                            <div className="message-section">
+                            <h2>
+                                <img
+                                    src={sectionLogos[sectionKey]}
+                                    alt={sectionTitles[sectionKey]}
+                                    className="section-logo"
+                                />
+                                {sectionTitles[sectionKey]}
+                            </h2>
                             <div className="messages-list">
                                 {sectionMessages.length === 0 ? (
                                     <p className="no-messages">Mesaj bekleniyor...</p>
@@ -203,9 +213,10 @@ function DisplayScreen() {
                                     </div>
                                 )}
                             </div>
+                            </div>
                         </div>
 
-                        {/* Section QR Code - Outside of message-section */}
+                        {/* Section QR Code - Outside of section-wrapper */}
                         <div className="section-qr-code">
                             <img
                                 src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(window.location.origin + '/send/' + sectionKey)}`}

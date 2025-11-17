@@ -14,11 +14,11 @@ function MobileForm() {
     const [sent, setSent] = useState(false);
 
     const sectionInfo = {
-        section1: { title: '🎉 Kutlamalar', color: '#FF6B6B' },
-        section2: { title: '💭 Dilekler', color: '#4ECDC4' },
-        section3: { title: '💡 Fikirler', color: '#45B7D1' },
-        section4: { title: '❤️ Teşekkürler', color: '#96CEB4' },
-        section5: { title: '📢 Duyurular', color: '#FECA57' }
+        section1: { title: 'ORTAK GELECEK', color: '#2655b5', logo: '/assets/ortak-gelecek.png' },
+        section2: { title: 'İŞ BİRLİĞİ & HİKAYE', color: '#84ba29', logo: '/assets/is-birligi-hikaye.png' },
+        section3: { title: 'MERAK & CESARET', color: '#2655b5', logo: '/assets/merak-cesaret.png' },
+        section4: { title: 'TEKNOLOJİ', color: '#84ba29', logo: '/assets/teknoloji.png' },
+        section5: { title: 'MÜŞTERİ DENEYİMİ', color: '#2655b5', logo: '/assets/musteri-deneyimi.png' }
     };
 
     const currentSection = sectionInfo[section] || sectionInfo.section1;
@@ -62,9 +62,14 @@ function MobileForm() {
     };
 
     return (
-        <div className="mobile-form" style={{ background: `linear-gradient(135deg, ${currentSection.color}dd, ${currentSection.color}99)` }}>
+        <div className="mobile-form" style={{ background: 'linear-gradient(135deg, #2655b5 0%, #84ba29 100%)' }}>
             <div className="mobile-container">
                 <div className="mobile-header">
+                    <h2 className="mobile-main-title">
+                        <span className="title-blue">BENİM PRENSİBİM</span>{' '}
+                        <span className="title-green">DUVARI</span>
+                    </h2>
+                    <img src={currentSection.logo} alt={currentSection.title} className="mobile-section-logo" />
                     <h1>{currentSection.title}</h1>
                     <p>Mesajınızı bu bölüme gönderin</p>
                 </div>
@@ -73,7 +78,7 @@ function MobileForm() {
                     <div className="success-message">
                         <div className="success-icon">✅</div>
                         <h2>Mesajınız Gönderildi!</h2>
-                        <p>Mesajınız ekranda görünecek</p>
+                        <p>Teşekkürler! 🙏</p>
                     </div>
                 ) : (
                     <form onSubmit={handleSubmit} className="message-form">
@@ -124,10 +129,11 @@ function MobileForm() {
                                 <button
                                     key={key}
                                     onClick={() => navigate(`/send/${key}`)}
-                                    className="section-btn"
+                                    className={`section-btn ${info.color === '#2655b5' ? 'btn-blue' : 'btn-green'}`}
                                     style={{ backgroundColor: info.color }}
                                 >
-                                    {info.title}
+                                    <img src={info.logo} alt={info.title} className="section-btn-logo" />
+                                    <span className="section-btn-text">{info.title}</span>
                                 </button>
                             )
                         ))}
