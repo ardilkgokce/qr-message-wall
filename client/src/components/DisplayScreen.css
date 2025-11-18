@@ -1,5 +1,6 @@
-/* Google Fonts - Anton for headings, Anton SC for body text */
+/* Google Fonts - Anton for headings, HeronSans for message boxes */
 @import url('https://fonts.googleapis.com/css2?family=Anton&family=Anton+SC&display=swap');
+@import url('https://fonts.cdnfonts.com/css/heron-sans');
 
 /* Body ve HTML scrollbar'ları sadece display screen'de kaldır */
 body.display-page {
@@ -233,7 +234,7 @@ body.display-page {
     margin-bottom: 6px;
     font-size: 1.3rem;
     line-height: 1.2;
-    font-family: 'Anton SC', 'Segoe UI', Tahoma, sans-serif;
+    font-family: 'HeronSans', 'Segoe UI', Tahoma, sans-serif;
 }
 
 .message-text {
@@ -241,7 +242,7 @@ body.display-page {
     line-height: 1.4;
     margin-bottom: 6px;
     font-size: 1.4rem;
-    font-family: 'Anton SC', 'Segoe UI', Tahoma, sans-serif;
+    font-family: 'HeronSans', 'Segoe UI', Tahoma, sans-serif;
 }
 
 .message-time {
@@ -250,6 +251,7 @@ body.display-page {
     font-weight: bold;
     text-align: right;
     line-height: 1.2;
+    font-family: 'HeronSans', 'Segoe UI', Tahoma, sans-serif;
 }
 
 .no-messages {
