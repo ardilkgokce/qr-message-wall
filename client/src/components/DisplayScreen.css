@@ -1,6 +1,5 @@
-/* Font from SVG design - HeronSans-Bold */
-/* Note: Add web font import if available, or use similar fallback */
-@import url('https://fonts.cdnfonts.com/css/heron-sans'); /* If available */
+/* Google Fonts - Anton for headings, Anton SC for body text */
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Anton+SC&display=swap');
 
 /* Body ve HTML scrollbar'ları sadece display screen'de kaldır */
 body.display-page {
@@ -9,7 +8,7 @@ body.display-page {
     overflow: hidden;
     height: 100vh;
     width: 100vw;
-    font-family: 'HeronSans', 'Segoe UI', Tahoma, sans-serif;
+    font-family: 'Anton SC', 'Segoe UI', Tahoma, sans-serif;
 }
 
 .display-screen {
@@ -47,8 +46,6 @@ body.display-page {
     flex-shrink: 0;
     text-align: center;
     padding: 30px 20px;
-    background: rgba(255,255,255,0.1);
-    backdrop-filter: blur(10px);
     color: white;
 }
 
@@ -58,8 +55,8 @@ body.display-page {
         /* Enhanced drop-shadow from SVG design */
         text-shadow: 1px 1px 3px rgba(0,0,0,0.75);
         line-height: 1.2;
-        font-family: 'HeronSans', 'Segoe UI', Tahoma, sans-serif;
-        font-weight: 700;
+        font-family: 'Anton', 'Segoe UI', Tahoma, sans-serif;
+        font-weight: 400;
         letter-spacing: 0.1em;
     }
 
@@ -121,8 +118,8 @@ body.display-page {
     .message-section h2 {
         flex-shrink: 0;
         font-size: 2.4rem;
-        font-weight: 700;
-        font-family: 'HeronSans', 'Segoe UI', Tahoma, sans-serif;
+        font-weight: 400;
+        font-family: 'Anton', 'Segoe UI', Tahoma, sans-serif;
         margin: 0;
         padding: 100px 15px 20px 15px;
         text-align: center;
@@ -236,7 +233,7 @@ body.display-page {
     margin-bottom: 6px;
     font-size: 1.3rem;
     line-height: 1.2;
-    font-family: 'HeronSans', 'Segoe UI', Tahoma, sans-serif;
+    font-family: 'Anton SC', 'Segoe UI', Tahoma, sans-serif;
 }
 
 .message-text {
@@ -244,7 +241,7 @@ body.display-page {
     line-height: 1.4;
     margin-bottom: 6px;
     font-size: 1.4rem;
-    font-family: 'HeronSans', 'Segoe UI', Tahoma, sans-serif;
+    font-family: 'Anton SC', 'Segoe UI', Tahoma, sans-serif;
 }
 
 .message-time {
