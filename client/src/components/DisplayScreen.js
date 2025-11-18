@@ -210,6 +210,16 @@ function DisplayScreen() {
                                                 </div>
                                             </div>
                                         ))}
+                                        {/* Üçüncü mesaj seti (sadece overflow varsa - smooth seamless loop için) */}
+                                        {overflowSections[sectionKey] && sectionMessages.slice(-10).map((msg) => (
+                                            <div key={`third-${msg.id}`} className="message-item">
+                                                <div className="message-author">{msg.author}</div>
+                                                <div className="message-text">{msg.text}</div>
+                                                <div className="message-time">
+                                                    {new Date(msg.timestamp).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+                                                </div>
+                                            </div>
+                                        ))}
                                     </div>
                                 )}
                             </div>

@@ -10,30 +10,29 @@
 }
 
 .kiosk-container {
-    background: white;
-    border-radius: 20px;
     width: 100%;
     max-width: 1800px;
     height: 95vh;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
     display: flex;
-    overflow: hidden;
+    gap: 20px;
 }
 
 /* Sol Kolon - Form */
 .kiosk-left {
     flex: 0 0 55%;
+    background: white;
+    border-radius: 20px;
     padding: 40px;
     display: flex;
     flex-direction: column;
     overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
 }
 
-/* Sağ Kolon - Klavye Alanı */
+/* Sağ Kolon - Klavye Alanı (Transparent, sadece boş alan) */
 .kiosk-right {
     flex: 0 0 45%;
-    background: #f5f5f5;
-    /* OS klavyesi buraya açılacak */
+    /* OS klavyesi bu alanın üstüne açılacak - arkaplan gradient */
 }
 
 .kiosk-header {
