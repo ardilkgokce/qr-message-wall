@@ -162,7 +162,7 @@ body.display-page {
     overflow: hidden;
     position: relative;
     padding: 20px;
-    margin: 0 15px 25px 15px;
+    margin: 0 5px 25px 5px;
     background: #84ba29;
     border-radius: 12px;
 }
@@ -219,7 +219,7 @@ body.display-page {
     opacity: 1 !important;
     border-radius: 15px;
     padding: 20px;
-    margin: 0 15px 10px 15px;
+    margin: 0 5px 10px 5px;
     box-shadow: 0 2px 10px rgba(38, 85, 181, 0.2);
     transition: transform 0.2s;
 }
@@ -274,7 +274,7 @@ body.display-page {
     border-top: none;
     box-shadow: none;
     width: fit-content;
-    margin: 10px auto 10px;
+    margin: 5px auto 5px;
 }
 
     .section-qr-code img {
@@ -339,7 +339,7 @@ body.display-page {
 
     .message-item {
         padding: 10px;
-        margin: 0 12px 8px 12px;
+        margin: 0 4px 8px 4px;
     }
 
     .message-author {
@@ -437,7 +437,7 @@ body.display-page {
 
     .message-item {
         padding: 9px;
-        margin: 0 12px 7px 12px;
+        margin: 0 4px 7px 4px;
         border-radius: 7px;
     }
 
@@ -539,7 +539,7 @@ body.aspect-16-9 .message-section h2 {
 
 body.aspect-16-9 .message-item {
     padding: 9px;
-    margin: 0 12px 7px 12px;
+    margin: 0 4px 7px 4px;
 }
 
 body.aspect-16-9 .message-author {
