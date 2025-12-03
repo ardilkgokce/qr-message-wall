@@ -5,6 +5,7 @@ import MobileForm from './components/MobileForm';
 import QRCodeDisplay from './components/QRCodeDisplay';
 import AdminPanel from './components/AdminPanel';
 import KioskScreen from './components/KioskScreen';
+import TabletQRDisplay from './components/TabletQRDisplay';
 import './App.css';
 
 function App() {
@@ -24,6 +25,9 @@ function App() {
                     {/* Kiosk Ekranı - Dokunmatik ekran için */}
                     <Route path="/kiosk" element={<KioskScreen />} />
                     <Route path="/kiosk/:section" element={<KioskScreen />} />
+
+                    {/* Tablet QR Ekranı - Tüm QR kodları */}
+                    <Route path="/tablet-qr" element={<TabletQRDisplay />} />
 
                     {/* Admin Kontrol Paneli - ?key=admin123 ile erişim */}
                     <Route path="/admin" element={<AdminPanel />} />

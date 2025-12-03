@@ -1,0 +1,45 @@
+import React from 'react';
+import './TabletQRDisplay.css';
+
+function TabletQRDisplay() {
+    const sections = {
+        section1: { title: 'ORTAK GELECEK', logo: '/assets/ortak-gelecek.png' },
+        section2: { title: 'İŞ BİRLİĞİ & HİKAYE', logo: '/assets/is-birligi-hikaye.png' },
+        section3: { title: 'MERAK & CESARET', logo: '/assets/merak-cesaret.png' },
+        section4: { title: 'TEKNOLOJİ', logo: '/assets/teknoloji.png' },
+        section5: { title: 'MÜŞTERİ DENEYİMİ', logo: '/assets/musteri-deneyimi.png' }
+    };
+
+    return (
+        <div className="tablet-qr-screen">
+            <div className="tablet-qr-header">
+                <h1>
+                    <span className="title-blue">BENİM PRENSİBİM</span>{' '}
+                    <span className="title-green">DUVARI</span>
+                </h1>
+                <p>Mesaj göndermek için QR kodu okutun</p>
+            </div>
+
+            <div className="tablet-qr-grid">
+                {Object.entries(sections).map(([key, info]) => (
+                    <div key={key} className="tablet-qr-card">
+                        <img
+                            src={info.logo}
+                            alt={info.title}
+                            className="tablet-qr-logo"
+                        />
+                        <h2 className="tablet-qr-title">{info.title}</h2>
+                        <div className="tablet-qr-code">
+                            <img
+                                src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(window.location.origin + '/send/' + key)}`}
+                                alt={`QR - ${info.title}`}
+                            />
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+export default TabletQRDisplay;
