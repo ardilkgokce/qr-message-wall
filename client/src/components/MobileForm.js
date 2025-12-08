@@ -44,7 +44,7 @@ function MobileForm() {
             socket.emit('new-message', {
                 section: section,
                 text: message,
-                author: authorName || 'Misafir'
+                author: authorName || 'Anonim'
             });
 
             setTimeout(() => {

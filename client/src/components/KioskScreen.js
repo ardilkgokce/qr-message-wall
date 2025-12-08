@@ -47,7 +47,7 @@ function KioskScreen() {
             socket.emit('new-message', {
                 section: currentSectionKey,
                 text: message,
-                author: authorName || 'Misafir'
+                author: authorName || 'Anonim'
             });
 
             setTimeout(() => {
